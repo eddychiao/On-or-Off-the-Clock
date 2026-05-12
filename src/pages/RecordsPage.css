@@ -1,0 +1,204 @@
+.records-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.records-filters .input {
+  width: auto;
+  min-width: 140px;
+}
+
+.records-filter-reset {
+  margin-left: auto;
+}
+
+.month-section {
+  margin-bottom: 32px;
+}
+
+.month-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.month-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+}
+
+.month-section-count {
+  font-size: 12px;
+  color: var(--color-text-dim);
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-row {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+
+.record-row:hover { border-color: var(--color-accent); }
+
+.record-row-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.record-date {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 130px;
+  color: var(--color-text);
+}
+
+.record-weekday {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.record-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.record-chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.record-chip.commute { background: var(--color-morning-light); color: var(--color-morning); }
+.record-chip.work { background: var(--color-work-light); color: var(--color-work); }
+.record-chip.evening { background: var(--color-evening-light); color: var(--color-evening); }
+
+.record-row-expand {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-dim);
+  transition: transform var(--transition);
+}
+
+.record-row-expand.open { transform: rotate(180deg); }
+
+.record-detail {
+  border-top: 1px solid var(--color-border);
+  padding: 16px;
+  background: var(--color-surface-2);
+}
+
+.record-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.record-detail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-detail-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-dim);
+  margin-bottom: 2px;
+}
+
+.record-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.record-field-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.record-field-val {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-field-val.empty { color: var(--color-text-dim); font-weight: 400; }
+
+.record-detail-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.record-edit-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 13px;
+  padding: 3px 7px;
+  outline: none;
+  width: 90px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.pagination-page {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pagination-page:hover { background: var(--color-surface-2); color: var(--color-text); }
+.pagination-page.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.pagination-page:disabled { opacity: 0.3; cursor: not-allowed; }

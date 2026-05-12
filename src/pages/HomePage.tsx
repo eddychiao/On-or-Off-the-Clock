@@ -1,0 +1,78 @@
+import { useApp } from '../context/AppContext';
+import { TIME_FIELD_LABELS, TIME_FIELD_GROUPS } from '../types';
+import type { TimeField } from '../types';
+import TimeCard from '../components/TimeCard';
+import { formatDate, todayISO } from '../utils/time';
+import './HomePage.css';
+
+const GROUP_META = [
+  { variant: 'morning' as const, icon: '🌅' },
+  { variant: 'work' as const, icon: '💼' },
+  { variant: 'evening' as const, icon: '🌆' },
+];
+
+const QUICK_FIELD_ICONS: Record<TimeField, string> = {
+  commute_start: '🏠',
+  commute_end: '🏢',
+  work_start: '▶️',
+  work_end: '⏹',
+  commute_home_start: '🚗',
+  commute_home_end: '🏠',
+};
+
+export default function HomePage() {
+  const { todayEntry, logField, loading, error } = useApp();
+  const today = todayISO();
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1 className="page-title">Today</h1>
+        <p className="page-subtitle home-date">{formatDate(today)}</p>
+      </div>
+
+      {error && <div className="error-banner">{error}</div>}
+
+      {loading ? (
+        <div className="empty-state"><div className="loading-spinner" /></div>
+      ) : (
+        <>
+          <div className="home-cards">
+            {TIME_FIELD_GROUPS.map((group, i) => (
+              <TimeCard
+                key={group.label}
+                entry={todayEntry}
+                date={today}
+                variant={GROUP_META[i].variant}
+                icon={GROUP_META[i].icon}
+                title={group.label}
+                fields={group.fields}
+              />
+            ))}
+          </div>
+
+          <div className="home-quick-log">
+            <div className="home-quick-log-title">Quick Log</div>
+            <div className="quick-log-grid">
+              {TIME_FIELD_GROUPS.flatMap(g => g.fields).map((field) => {
+                const logged = !!todayEntry?.[field];
+                return (
+                  <button
+                    key={field}
+                    className={`quick-log-btn${logged ? ' logged' : ''}`}
+                    onClick={() => !logged && logField(field)}
+                    title={logged ? 'Already logged' : `Log ${TIME_FIELD_LABELS[field]}`}
+                  >
+                    <span className="quick-log-btn-icon">{QUICK_FIELD_ICONS[field]}</span>
+                    <span className="quick-log-btn-label">{TIME_FIELD_LABELS[field]}</span>
+                    {logged && <span style={{ fontSize: '10px', color: 'var(--color-success)' }}>✓ Logged</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
