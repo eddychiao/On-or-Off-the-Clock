@@ -74,3 +74,17 @@
 
 .quick-log-btn-icon { font-size: 20px; }
 .quick-log-btn-label { letter-spacing: 0.2px; }
+
+@media (max-width: 768px) {
+  .home-quick-log { padding: 16px; }
+
+  .quick-log-grid { gap: 8px; }
+
+  .quick-log-btn {
+    padding: 16px 8px;
+    min-height: 72px;
+    font-size: 11px;
+  }
+
+  .quick-log-btn-icon { font-size: 24px; }
+}

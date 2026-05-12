@@ -129,3 +129,27 @@
   gap: 16px;
   margin-bottom: 16px;
 }
+
+@media (max-width: 768px) {
+  .stats-range-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  /* 2 columns instead of 3 */
+  .stats-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .kpi-card { padding: 14px 16px; }
+  .kpi-value { font-size: 22px; }
+
+  .stats-chart-card { padding: 16px; }
+
+  /* Stack the two side-by-side charts */
+  .stats-two-col { grid-template-columns: 1fr; }
+
+  .overtime-row { min-height: 44px; padding: 10px 12px; }
+}

@@ -38,6 +38,10 @@ export default function NavBar() {
             {label}
           </NavLink>
         ))}
+        <button className="navbar-mobile-signout" onClick={signOut}>
+          <span className="navbar-mobile-signout-icon">👤</span>
+          Sign out
+        </button>
       </div>
 
       <div className="navbar-footer">

@@ -202,3 +202,48 @@
 .pagination-page:hover { background: var(--color-surface-2); color: var(--color-text); }
 .pagination-page.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
 .pagination-page:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .records-filters { gap: 8px; }
+  .records-filters .input { min-width: 0; flex: 1; }
+  .records-filter-reset { margin-left: 0; width: 100%; }
+
+  .record-row-header {
+    padding: 14px 12px;
+    min-height: 56px;
+    gap: 8px;
+  }
+
+  .record-date { min-width: 80px; font-size: 13px; }
+  .record-weekday { display: block; }
+
+  .record-chips { gap: 4px; }
+  .record-chip { font-size: 10px; padding: 3px 6px; }
+
+  .record-detail { padding: 12px; }
+
+  /* Stack the 3-column detail into a single column */
+  .record-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .record-field-row { min-height: 40px; }
+
+  .record-field-val { font-size: 15px; }
+
+  .record-edit-input {
+    font-size: 16px; /* prevent iOS zoom */
+    min-height: 40px;
+    width: 100px;
+  }
+
+  .pagination-page {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .record-detail-actions { flex-wrap: wrap; }
+  .record-detail-actions .btn { flex: 1; justify-content: center; }
+}

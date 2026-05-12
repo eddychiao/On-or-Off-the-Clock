@@ -146,3 +146,26 @@
 .morning .duration-badge { background: var(--color-morning-light); color: var(--color-morning); }
 .work .duration-badge { background: var(--color-work-light); color: var(--color-work); }
 .evening .duration-badge { background: var(--color-evening-light); color: var(--color-evening); }
+
+@media (max-width: 768px) {
+  .time-card { padding: 16px; }
+
+  .time-field { gap: 8px; }
+
+  .time-field-label { font-size: 14px; width: 100px; }
+
+  .time-display { font-size: 22px; }
+
+  .log-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .time-edit-input {
+    font-size: 16px; /* prevent iOS zoom */
+    min-height: 44px;
+    width: 110px;
+    padding: 8px;
+  }
+}
