@@ -115,7 +115,7 @@ export default function HomePage() {
                   >
                     <span className="quick-log-btn-icon">{QUICK_FIELD_ICONS[field]}</span>
                     <span className="quick-log-btn-label">{TIME_FIELD_LABELS[field]}</span>
-                    {logged && <span style={{ fontSize: '10px', color: 'var(--color-success)' }}>✓ Logged</span>}
+                    <span className={`quick-log-btn-status${logged ? ' logged' : ''}`}>✓ Logged</span>
                   </button>
                 );
               })}

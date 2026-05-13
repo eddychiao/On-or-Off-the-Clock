@@ -122,6 +122,12 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
 
   const notesValue = notesDraft ?? (entry.notes ?? '');
 
+  const notesRef = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [notesValue]);
+
   const saveNotes = async () => {
     if (notesDraft === null) return;
     await updateField(entry.id, 'notes', notesDraft.trim() || null);
@@ -216,11 +222,7 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
               placeholder="Add a note…"
               value={notesValue}
               rows={1}
-              ref={useCallback((el: HTMLTextAreaElement | null) => {
-                if (!el) return;
-                el.style.height = 'auto';
-                el.style.height = `${el.scrollHeight}px`;
-              }, [notesValue])}
+              ref={notesRef}
               onChange={e => {
                 setNotesDraft(e.target.value);
                 e.target.style.height = 'auto';

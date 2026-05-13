@@ -99,6 +99,14 @@
 .quick-log-btn-icon { font-size: 20px; }
 .quick-log-btn-label { letter-spacing: 0.2px; }
 
+.quick-log-btn-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: transparent;
+  line-height: 1;
+}
+.quick-log-btn-status.logged { color: var(--color-success); }
+
 /* ── Notes ── */
 .home-notes {
   margin-top: 16px;

@@ -34,7 +34,7 @@
 }
 
 .navbar-logo-title span:first-child { color: var(--color-morning); }
-.navbar-logo-title span:last-child { color: var(--color-accent); }
+.navbar-logo-title span:last-child { color: var(--color-evening); }
 
 .navbar-logo-sub {
   font-size: 11px;

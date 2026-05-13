@@ -35,7 +35,7 @@
 }
 
 .login-logo-title .on { color: var(--color-morning); }
-.login-logo-title .off { color: var(--color-accent); }
+.login-logo-title .off { color: var(--color-evening); }
 .login-logo-title .the-clock { color: var(--color-text-muted); font-weight: 600; }
 
 .login-logo-sub {
