@@ -47,5 +47,5 @@ export interface RecordsFilter {
 }
 
 export interface StatsFilter {
-  range: 'week' | 'month' | '3months' | '6months' | 'year' | 'all';
+  range: 'week' | 'month' | '3months' | '6months' | 'year' | 'all' | 'custom';
 }

@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { useApp } from '../context/AppContext';
 import type { StatsFilter } from '../types';
-import { durationMinutes, formatDuration } from '../utils/time';
+import { durationMinutes, formatDuration, todayISO } from '../utils/time';
 import './StatsPage.css';
 
 const RANGES: { label: string; value: StatsFilter['range'] }[] = [
@@ -15,6 +15,7 @@ const RANGES: { label: string; value: StatsFilter['range'] }[] = [
   { label: '6 months', value: '6months' },
   { label: 'Year', value: 'year' },
   { label: 'All time', value: 'all' },
+  { label: 'Custom', value: 'custom' },
 ];
 
 function getCutoff(range: StatsFilter['range']): Date | null {
@@ -25,7 +26,9 @@ function getCutoff(range: StatsFilter['range']): Date | null {
     case '3months': return new Date(now.getTime() - 90  * 86400000);
     case '6months': return new Date(now.getTime() - 180 * 86400000);
     case 'year':    return new Date(now.getTime() - 365 * 86400000);
-    case 'all':     return null;
+    case 'all':
+    case 'custom':
+    default:        return null;
   }
 }
 
@@ -76,13 +79,23 @@ function KpiCard({ label, value, sub, colorClass }: {
 export default function StatsPage() {
   const { entries } = useApp();
   const [range, setRange] = useState<StatsFilter['range']>('month');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const today = todayISO();
 
   const filtered = useMemo(() => {
+    if (range === 'custom') {
+      return entries.filter(e => {
+        if (fromDate && e.date < fromDate) return false;
+        if (toDate && e.date > toDate) return false;
+        return true;
+      });
+    }
     const cutoff = getCutoff(range);
     return entries.filter(e =>
       !cutoff || new Date(e.date + 'T12:00:00') >= cutoff
     );
-  }, [entries, range]);
+  }, [entries, range, fromDate, toDate]);
 
   const commuteMorMins = useMemo(() =>
     filtered.map(e => durationMinutes(e.commute_start, e.commute_end)).filter((v): v is number => v !== null),
@@ -194,6 +207,32 @@ export default function StatsPage() {
           </button>
         ))}
       </div>
+
+      {range === 'custom' && (
+        <div className="stats-date-range">
+          <div className="stats-date-field">
+            <label className="stats-date-label">From</label>
+            <input
+              type="date"
+              className="input"
+              value={fromDate}
+              max={toDate || today}
+              onChange={e => setFromDate(e.target.value)}
+            />
+          </div>
+          <div className="stats-date-field">
+            <label className="stats-date-label">To</label>
+            <input
+              type="date"
+              className="input"
+              value={toDate}
+              min={fromDate || undefined}
+              max={today}
+              onChange={e => setToDate(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="stats-kpi-grid">
         <KpiCard
