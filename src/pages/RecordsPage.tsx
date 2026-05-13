@@ -7,8 +7,6 @@ import './RecordsPage.css';
 
 const PAGE_SIZE = 30;
 
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 const COMMUTE_FIELDS: { field: TimeField; label: string }[] = [
   { field: 'commute_start', label: 'Leave home' },
   { field: 'commute_end', label: 'Arrive work' },
@@ -253,8 +251,8 @@ export default function RecordsPage() {
   const { entries, loading } = useApp();
   const today = todayISO();
 
-  const [filterYear, setFilterYear] = useState<string>('');
-  const [filterMonth, setFilterMonth] = useState<string>('');
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
   const [page, setPage] = useState(1);
   const [addEntryOpen, setAddEntryOpen] = useState(false);
 
@@ -263,18 +261,13 @@ export default function RecordsPage() {
     [entries, today]
   );
 
-  const years = useMemo(() => {
-    const s = new Set(pastEntries.map(e => e.date.slice(0, 4)));
-    return Array.from(s).sort((a, b) => b.localeCompare(a));
-  }, [pastEntries]);
-
   const filtered = useMemo(() => {
     return pastEntries.filter(e => {
-      if (filterYear && !e.date.startsWith(filterYear)) return false;
-      if (filterMonth && e.date.slice(5, 7) !== filterMonth.padStart(2, '0')) return false;
+      if (fromDate && e.date < fromDate) return false;
+      if (toDate && e.date > toDate) return false;
       return true;
     });
-  }, [pastEntries, filterYear, filterMonth]);
+  }, [pastEntries, fromDate, toDate]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, TimeEntry[]>();
@@ -301,7 +294,7 @@ export default function RecordsPage() {
     return result;
   }, [grouped, page]);
 
-  const reset = () => { setFilterYear(''); setFilterMonth(''); setPage(1); };
+  const reset = () => { setFromDate(''); setToDate(''); setPage(1); };
 
   if (loading) return <div className="page"><div className="empty-state"><div className="loading-spinner" /></div></div>;
 
@@ -310,7 +303,7 @@ export default function RecordsPage() {
       {addEntryOpen && <AddEntryModal onClose={() => setAddEntryOpen(false)} />}
       <div className="page-header records-page-header">
         <div>
-          <h1 className="page-title">Records</h1>
+          <h1 className="page-title">History</h1>
           <p className="page-subtitle">{filtered.length} entr{filtered.length === 1 ? 'y' : 'ies'}</p>
         </div>
         <button className="btn btn-primary btn-sm" onClick={() => setAddEntryOpen(true)}>
@@ -319,16 +312,29 @@ export default function RecordsPage() {
       </div>
 
       <div className="records-filters">
-        <select className="input" value={filterYear} onChange={e => { setFilterYear(e.target.value); setPage(1); }}>
-          <option value="">All years</option>
-          {years.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-        <select className="input" value={filterMonth} onChange={e => { setFilterMonth(e.target.value); setPage(1); }}>
-          <option value="">All months</option>
-          {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-        </select>
-        {(filterYear || filterMonth) && (
-          <button className="btn btn-ghost btn-sm records-filter-reset" onClick={reset}>Clear filters</button>
+        <div className="records-date-field">
+          <label className="records-date-label">From</label>
+          <input
+            type="date"
+            className="input"
+            value={fromDate}
+            max={toDate || today}
+            onChange={e => { setFromDate(e.target.value); setPage(1); }}
+          />
+        </div>
+        <div className="records-date-field">
+          <label className="records-date-label">To</label>
+          <input
+            type="date"
+            className="input"
+            value={toDate}
+            min={fromDate || undefined}
+            max={today}
+            onChange={e => { setToDate(e.target.value); setPage(1); }}
+          />
+        </div>
+        {(fromDate || toDate) && (
+          <button className="btn btn-ghost btn-sm" onClick={reset}>Clear</button>
         )}
       </div>
 

@@ -6,7 +6,7 @@ import './NavBar.css';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Today' },
-  { to: '/records', label: 'Records' },
+  { to: '/records', label: 'History' },
   { to: '/stats', label: 'Stats' },
 ];
 
