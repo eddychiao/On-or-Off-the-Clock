@@ -57,6 +57,10 @@ function formatTimeDecimal(v: number): string {
   return `${h}:${m}`;
 }
 
+function fmtMins(v: unknown): string {
+  return formatDuration(Math.round(Number(v)));
+}
+
 function KpiCard({ label, value, sub, colorClass }: {
   label: string; value: string; sub?: string; colorClass?: string;
 }) {
@@ -234,14 +238,13 @@ export default function StatsPage() {
         <div className="stats-chart-card">
           <div className="stats-chart-title">
             🚗 Commute Duration Over Time
-            <span className="stats-chart-subtitle">minutes</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={commuteByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} unit="m" />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, '']} />
+              <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} tickFormatter={fmtMins} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v) => [fmtMins(v), '']} />
               <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--color-text-muted)' }} />
               <Line type="monotone" dataKey="morning" stroke="var(--color-morning)" strokeWidth={2} dot={false} name="Morning 🌅" connectNulls />
               <Line type="monotone" dataKey="evening" stroke="var(--color-evening)" strokeWidth={2} dot={false} name="Evening 🌆" connectNulls />
@@ -258,8 +261,8 @@ export default function StatsPage() {
               <BarChart data={morningByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
-                <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} unit="m" />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, 'Duration']} />
+                <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} tickFormatter={fmtMins} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [fmtMins(v), 'Duration']} />
                 <Bar dataKey="mins" fill="var(--color-morning)" radius={[3, 3, 0, 0]} name="Morning" />
               </BarChart>
             </ResponsiveContainer>
@@ -273,8 +276,8 @@ export default function StatsPage() {
               <BarChart data={eveningByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
-                <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} unit="m" />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, 'Duration']} />
+                <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} tickFormatter={fmtMins} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [fmtMins(v), 'Duration']} />
                 <Bar dataKey="mins" fill="var(--color-evening)" radius={[3, 3, 0, 0]} name="Evening" />
               </BarChart>
             </ResponsiveContainer>
