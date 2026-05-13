@@ -12,6 +12,7 @@ interface AppContextValue {
   logField: (field: TimeField) => Promise<void>;
   clearField: (entryId: string, field: TimeField) => Promise<void>;
   updateField: (entryId: string, field: TimeField | 'notes', value: string | null) => Promise<void>;
+  saveNotes: (value: string) => Promise<void>;
   deleteEntry: (entryId: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -91,6 +92,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await storage.updateEntryField(entryId, field, value);
   }, []);
 
+  const saveNotes = useCallback(async (value: string) => {
+    if (!user) return;
+    const trimmed = value.trim() || null;
+    const existing = entries.find(e => e.date === today);
+    if (existing) {
+      setEntries(prev => prev.map(e => e.id === existing.id ? { ...e, notes: trimmed } : e));
+      await storage.updateEntryField(existing.id, 'notes', trimmed);
+    } else if (trimmed) {
+      const saved = await storage.upsertEntry({ user_id: user.id, date: today, notes: trimmed });
+      setEntries(prev => [saved, ...prev]);
+    }
+  }, [user, entries, today]);
+
   const deleteEntry = useCallback(async (entryId: string) => {
     setEntries(prev => prev.filter(e => e.id !== entryId));
     await storage.deleteEntry(entryId);
@@ -105,6 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       logField,
       clearField,
       updateField,
+      saveNotes,
       deleteEntry,
       refresh: load,
     }}>

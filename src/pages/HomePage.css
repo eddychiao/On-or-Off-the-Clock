@@ -36,7 +36,7 @@
 
 .quick-log-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
@@ -75,14 +75,57 @@
 .quick-log-btn-icon { font-size: 20px; }
 .quick-log-btn-label { letter-spacing: 0.2px; }
 
+/* ── Notes ── */
+.home-notes {
+  margin-top: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+}
+
+.home-notes-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  margin-bottom: 10px;
+}
+
+.home-notes-input {
+  width: 100%;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  padding: 10px 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition);
+  min-height: 80px;
+}
+
+.home-notes-input:focus { border-color: var(--color-accent); }
+.home-notes-input::placeholder { color: var(--color-text-dim); }
+
 @media (max-width: 768px) {
   .home-quick-log { padding: 16px; }
+  .home-notes { padding: 14px 16px; }
+
+  .home-notes-input {
+    font-size: 16px; /* prevent iOS zoom */
+    min-height: 90px;
+  }
 
   .quick-log-grid { gap: 8px; }
 
   .quick-log-btn {
     padding: 16px 8px;
-    min-height: 72px;
+    min-height: 80px;
     font-size: 11px;
   }
 

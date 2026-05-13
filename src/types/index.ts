@@ -35,10 +35,6 @@ export const TIME_FIELD_GROUPS = [
     fields: ['commute_start', 'commute_end'] as TimeField[],
   },
   {
-    label: 'Work',
-    fields: ['work_start', 'work_end'] as TimeField[],
-  },
-  {
     label: 'Evening Commute',
     fields: ['commute_home_start', 'commute_home_end'] as TimeField[],
   },

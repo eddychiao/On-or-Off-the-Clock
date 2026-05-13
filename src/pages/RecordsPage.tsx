@@ -14,7 +14,16 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<TimeField | null>(null);
   const [editVal, setEditVal] = useState('');
+  const [notesDraft, setNotesDraft] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const notesValue = notesDraft ?? (entry.notes ?? '');
+
+  const saveNotes = async () => {
+    if (notesDraft === null) return;
+    await updateField(entry.id, 'notes', notesDraft.trim() || null);
+    setNotesDraft(null);
+  };
 
   const startEdit = (field: TimeField) => {
     setEditing(field);
@@ -33,7 +42,6 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
   const weekday = date.toLocaleDateString([], { weekday: 'short' });
   const dateLabel = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-  const workDur = formatDuration(durationMinutes(entry.work_start, entry.work_end));
   const commuteMorDur = formatDuration(durationMinutes(entry.commute_start, entry.commute_end));
   const commuteEveDur = formatDuration(durationMinutes(entry.commute_home_start, entry.commute_home_end));
 
@@ -48,11 +56,11 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
           {(entry.commute_start || entry.commute_end) && (
             <span className="record-chip commute">🌅 {commuteMorDur}</span>
           )}
-          {(entry.work_start || entry.work_end) && (
-            <span className="record-chip work">💼 {workDur}</span>
-          )}
           {(entry.commute_home_start || entry.commute_home_end) && (
             <span className="record-chip evening">🌆 {commuteEveDur}</span>
+          )}
+          {entry.notes && (
+            <span className="record-chip notes">📝</span>
           )}
         </div>
         <span className={`record-row-expand${open ? ' open' : ''}`}>▼</span>
@@ -98,6 +106,18 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
               </div>
             ))}
           </div>
+          <div className="record-notes">
+            <div className="record-notes-label">Notes</div>
+            <textarea
+              className="record-notes-input"
+              placeholder="Add a note…"
+              value={notesValue}
+              rows={2}
+              onChange={e => setNotesDraft(e.target.value)}
+              onBlur={saveNotes}
+            />
+          </div>
+
           <div className="record-detail-actions">
             {confirmDelete ? (
               <>

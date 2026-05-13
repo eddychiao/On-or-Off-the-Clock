@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TIME_FIELD_LABELS, TIME_FIELD_GROUPS } from '../types';
 import type { TimeField } from '../types';
@@ -7,7 +8,6 @@ import './HomePage.css';
 
 const GROUP_META = [
   { variant: 'morning' as const, icon: '🌅' },
-  { variant: 'work' as const, icon: '💼' },
   { variant: 'evening' as const, icon: '🌆' },
 ];
 
@@ -17,12 +17,42 @@ const QUICK_FIELD_ICONS: Record<TimeField, string> = {
   work_start: '▶️',
   work_end: '⏹',
   commute_home_start: '🚗',
-  commute_home_end: '🏠',
+  commute_home_end: '🏡',
 };
+
+function NotesArea() {
+  const { todayEntry, saveNotes } = useApp();
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const value = draft ?? (todayEntry?.notes ?? '');
+
+  const handleBlur = () => {
+    if (draft !== null) {
+      saveNotes(draft);
+      setDraft(null);
+    }
+  };
+
+  return (
+    <div className="home-notes">
+      <div className="home-notes-label">Notes</div>
+      <textarea
+        className="home-notes-input"
+        placeholder="Anything worth noting about today…"
+        value={value}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={handleBlur}
+        rows={3}
+      />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const { todayEntry, logField, loading, error } = useApp();
   const today = todayISO();
+
+  const quickFields = TIME_FIELD_GROUPS.flatMap(g => g.fields);
 
   return (
     <div className="page">
@@ -51,10 +81,12 @@ export default function HomePage() {
             ))}
           </div>
 
+          <NotesArea />
+
           <div className="home-quick-log">
             <div className="home-quick-log-title">Quick Log</div>
             <div className="quick-log-grid">
-              {TIME_FIELD_GROUPS.flatMap(g => g.fields).map((field) => {
+              {quickFields.map((field) => {
                 const logged = !!todayEntry?.[field];
                 return (
                   <button
