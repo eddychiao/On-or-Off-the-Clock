@@ -26,13 +26,12 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-logo">
-          <div className="login-logo-icon">⏱</div>
+          <div className="login-logo-icon">🚗</div>
           <div className="login-logo-title">
-            <span className="on">On</span>
-            <span className="slash">/</span>
-            <span className="off">Off</span> the Clock
+            <span className="on">On</span><span className="off">Off</span>
+            <span className="the-clock"> the Clock</span>
           </div>
-          <div className="login-logo-sub">Work & commute time tracker</div>
+          <div className="login-logo-sub">Commute time tracker</div>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>

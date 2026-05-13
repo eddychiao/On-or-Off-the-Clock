@@ -23,24 +23,25 @@
 }
 
 .login-logo-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
+  font-size: 48px;
+  margin-bottom: 14px;
+  line-height: 1;
 }
 
 .login-logo-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
 }
 
-.login-logo-title .on { color: var(--color-accent); }
-.login-logo-title .slash { color: var(--color-text-muted); }
-.login-logo-title .off { color: var(--color-text); }
+.login-logo-title .on { color: var(--color-morning); }
+.login-logo-title .off { color: var(--color-accent); }
+.login-logo-title .the-clock { color: var(--color-text-muted); font-weight: 600; }
 
 .login-logo-sub {
   font-size: 13px;
   color: var(--color-text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .login-form {
