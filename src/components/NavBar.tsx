@@ -25,7 +25,7 @@ export default function NavBar() {
         <div className="navbar-logo-emoji">🚗</div>
         <div>
           <div className="navbar-logo-title">
-            <span>On</span><span>/Off</span>
+            <span>On</span><span>Off</span>
           </div>
           <div className="navbar-logo-sub">the Clock</div>
         </div>
