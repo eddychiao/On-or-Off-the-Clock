@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TIME_FIELD_LABELS, TIME_FIELD_GROUPS } from '../types';
 import type { TimeField } from '../types';
@@ -32,8 +32,16 @@ const QUICK_FIELD_COLOR: Record<TimeField, 'morning' | 'evening'> = {
 function NotesArea() {
   const { todayEntry, saveNotes } = useApp();
   const [draft, setDraft] = useState<string | null>(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
 
   const value = draft ?? (todayEntry?.notes ?? '');
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
 
   const handleBlur = () => {
     if (draft !== null) {
@@ -46,12 +54,13 @@ function NotesArea() {
     <div className="home-notes">
       <div className="home-notes-label">Notes</div>
       <textarea
+        ref={ref}
         className="home-notes-input"
         placeholder="Anything worth noting about today…"
         value={value}
         onChange={e => setDraft(e.target.value)}
         onBlur={handleBlur}
-        rows={3}
+        rows={1}
       />
     </div>
   );

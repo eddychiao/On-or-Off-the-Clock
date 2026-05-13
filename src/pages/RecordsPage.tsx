@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { TIME_FIELD_LABELS, TIME_FIELD_GROUPS } from '../types';
 import type { TimeEntry, TimeField } from '../types';
@@ -92,10 +92,15 @@ function AddEntryModal({ onClose }: { onClose: () => void }) {
           <label className="modal-label">Notes</label>
           <textarea
             className="input"
-            rows={2}
+            rows={1}
             value={notes}
             placeholder="Optional note…"
-            onChange={e => setNotes(e.target.value)}
+            onChange={e => {
+              setNotes(e.target.value);
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            style={{ overflow: 'hidden', resize: 'none' }}
           />
         </div>
         <div className="modal-footer">
@@ -212,8 +217,17 @@ function RecordRow({ entry }: { entry: TimeEntry }) {
               className="record-notes-input"
               placeholder="Add a note…"
               value={notesValue}
-              rows={2}
-              onChange={e => setNotesDraft(e.target.value)}
+              rows={1}
+              ref={useCallback((el: HTMLTextAreaElement | null) => {
+                if (!el) return;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+              }, [notesValue])}
+              onChange={e => {
+                setNotesDraft(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
               onBlur={saveNotes}
             />
           </div>
