@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend,
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Legend,
 } from 'recharts';
 import { useApp } from '../context/AppContext';
 import type { StatsFilter } from '../types';
@@ -19,12 +20,12 @@ const RANGES: { label: string; value: StatsFilter['range'] }[] = [
 function getCutoff(range: StatsFilter['range']): Date | null {
   const now = new Date();
   switch (range) {
-    case 'week': return new Date(now.getTime() - 7 * 86400000);
-    case 'month': return new Date(now.getTime() - 30 * 86400000);
-    case '3months': return new Date(now.getTime() - 90 * 86400000);
+    case 'week':    return new Date(now.getTime() - 7   * 86400000);
+    case 'month':   return new Date(now.getTime() - 30  * 86400000);
+    case '3months': return new Date(now.getTime() - 90  * 86400000);
     case '6months': return new Date(now.getTime() - 180 * 86400000);
-    case 'year': return new Date(now.getTime() - 365 * 86400000);
-    case 'all': return null;
+    case 'year':    return new Date(now.getTime() - 365 * 86400000);
+    case 'all':     return null;
   }
 }
 
@@ -33,7 +34,32 @@ function avg(nums: number[]): number {
   return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
-function KpiCard({ label, value, sub, colorClass }: { label: string; value: string; sub?: string; colorClass?: string }) {
+function safeMax(nums: number[]): number {
+  return nums.length ? Math.max(...nums) : 0;
+}
+
+function safeMin(nums: number[]): number {
+  return nums.length ? Math.min(...nums) : 0;
+}
+
+function toDateLabel(dateStr: string) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function toTimeDecimal(iso: string): number {
+  const d = new Date(iso);
+  return Math.round((d.getHours() + d.getMinutes() / 60) * 10) / 10;
+}
+
+function formatTimeDecimal(v: number): string {
+  const h = Math.floor(v);
+  const m = String(Math.round((v % 1) * 60)).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+function KpiCard({ label, value, sub, colorClass }: {
+  label: string; value: string; sub?: string; colorClass?: string;
+}) {
   return (
     <div className="kpi-card">
       <div className="kpi-label">{label}</div>
@@ -49,90 +75,92 @@ export default function StatsPage() {
 
   const filtered = useMemo(() => {
     const cutoff = getCutoff(range);
-    return entries.filter(e => {
-      if (!cutoff) return true;
-      return new Date(e.date + 'T12:00:00') >= cutoff;
-    });
+    return entries.filter(e =>
+      !cutoff || new Date(e.date + 'T12:00:00') >= cutoff
+    );
   }, [entries, range]);
-
-  const workMins = useMemo(() =>
-    filtered.map(e => durationMinutes(e.work_start, e.work_end)).filter((v): v is number => v !== null),
-    [filtered]);
 
   const commuteMorMins = useMemo(() =>
     filtered.map(e => durationMinutes(e.commute_start, e.commute_end)).filter((v): v is number => v !== null),
-    [filtered]);
+  [filtered]);
 
   const commuteEveMins = useMemo(() =>
     filtered.map(e => durationMinutes(e.commute_home_start, e.commute_home_end)).filter((v): v is number => v !== null),
-    [filtered]);
+  [filtered]);
 
-  const daysWithWork = workMins.length;
-  const avgWork = avg(workMins);
-  const avgCommuteMor = avg(commuteMorMins);
-  const avgCommuteEve = avg(commuteEveMins);
-  const totalMins = workMins.reduce((a, b) => a + b, 0);
-  const overtimeDays = workMins.filter(m => m > 480).length;
-  const longestDay = Math.max(0, ...workMins);
-  const shortestDay = workMins.length ? Math.min(...workMins) : 0;
-
-  const workByDay = useMemo(() => {
-    return filtered
-      .filter(e => e.work_start && e.work_end)
-      .map(e => {
-        const d = new Date(e.date + 'T12:00:00');
-        return {
-          date: d.toLocaleDateString([], { month: 'short', day: 'numeric' }),
-          hours: Math.round((durationMinutes(e.work_start, e.work_end)! / 60) * 10) / 10,
-        };
-      })
-      .reverse();
+  const totalCommuteMins = useMemo(() => {
+    return filtered.flatMap(e => {
+      const mor = durationMinutes(e.commute_start, e.commute_end);
+      const eve = durationMinutes(e.commute_home_start, e.commute_home_end);
+      if (mor !== null && eve !== null) return [mor + eve];
+      return [];
+    });
   }, [filtered]);
 
-  const commuteByDay = useMemo(() => {
-    return filtered
+  const daysLogged = filtered.length;
+  const avgMor = avg(commuteMorMins);
+  const avgEve = avg(commuteEveMins);
+  const avgTotal = avg(totalCommuteMins);
+  const longestMor = safeMax(commuteMorMins);
+  const shortestMor = safeMin(commuteMorMins);
+  const longestEve = safeMax(commuteEveMins);
+  const shortestEve = safeMin(commuteEveMins);
+
+  // Duration over time — line chart
+  const commuteByDay = useMemo(() =>
+    filtered
       .filter(e => e.commute_start || e.commute_home_start)
-      .map(e => {
-        const d = new Date(e.date + 'T12:00:00');
-        const mor = durationMinutes(e.commute_start, e.commute_end);
-        const eve = durationMinutes(e.commute_home_start, e.commute_home_end);
-        return {
-          date: d.toLocaleDateString([], { month: 'short', day: 'numeric' }),
-          morning: mor !== null ? Math.round(mor) : undefined,
-          evening: eve !== null ? Math.round(eve) : undefined,
-        };
-      })
-      .reverse();
-  }, [filtered]);
+      .map(e => ({
+        date: toDateLabel(e.date),
+        morning: durationMinutes(e.commute_start, e.commute_end) ?? undefined,
+        evening: durationMinutes(e.commute_home_start, e.commute_home_end) ?? undefined,
+      }))
+      .reverse(),
+  [filtered]);
 
-  const startTimeByDay = useMemo(() => {
-    return filtered
-      .filter(e => e.work_start)
-      .map(e => {
-        const d = new Date(e.work_start!);
-        const decimal = d.getHours() + d.getMinutes() / 60;
-        return {
-          date: new Date(e.date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }),
-          startHour: Math.round(decimal * 10) / 10,
-        };
-      })
-      .reverse();
-  }, [filtered]);
+  // Morning commute bars
+  const morningByDay = useMemo(() =>
+    filtered
+      .filter(e => e.commute_start && e.commute_end)
+      .map(e => ({
+        date: toDateLabel(e.date),
+        mins: Math.round(durationMinutes(e.commute_start, e.commute_end)!),
+      }))
+      .reverse(),
+  [filtered]);
 
-  const overtimeData = useMemo(() => {
-    return filtered
-      .filter(e => e.work_start && e.work_end)
-      .map(e => {
-        const mins = durationMinutes(e.work_start, e.work_end)!;
-        return {
-          date: new Date(e.date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }),
-          hours: Math.round((mins / 60) * 10) / 10,
-          over: mins > 480,
-        };
-      })
-      .sort((a, b) => b.hours - a.hours)
-      .slice(0, 10);
-  }, [filtered]);
+  // Evening commute bars
+  const eveningByDay = useMemo(() =>
+    filtered
+      .filter(e => e.commute_home_start && e.commute_home_end)
+      .map(e => ({
+        date: toDateLabel(e.date),
+        mins: Math.round(durationMinutes(e.commute_home_start, e.commute_home_end)!),
+      }))
+      .reverse(),
+  [filtered]);
+
+  // Departure time trend — when do you leave home?
+  const departureByDay = useMemo(() =>
+    filtered
+      .filter(e => e.commute_start)
+      .map(e => ({
+        date: toDateLabel(e.date),
+        time: toTimeDecimal(e.commute_start!),
+      }))
+      .reverse(),
+  [filtered]);
+
+  // Arrival home trend — when do you get home?
+  const arrivalByDay = useMemo(() =>
+    filtered
+      .filter(e => e.commute_home_end)
+      .map(e => ({
+        date: toDateLabel(e.date),
+        time: toTimeDecimal(e.commute_home_end!),
+      }))
+      .reverse(),
+  [filtered]);
 
   const tooltipStyle = {
     backgroundColor: 'var(--color-surface)',
@@ -142,11 +170,13 @@ export default function StatsPage() {
     fontSize: '13px',
   };
 
+  const hasAnyData = commuteMorMins.length > 0 || commuteEveMins.length > 0;
+
   return (
     <div className="page">
       <div className="page-header">
         <h1 className="page-title">Stats</h1>
-        <p className="page-subtitle">{daysWithWork} work day{daysWithWork !== 1 ? 's' : ''} in range</p>
+        <p className="page-subtitle">{daysLogged} day{daysLogged !== 1 ? 's' : ''} logged in range</p>
       </div>
 
       <div className="stats-filters">
@@ -162,102 +192,146 @@ export default function StatsPage() {
       </div>
 
       <div className="stats-kpi-grid">
-        <KpiCard label="Avg work hours" value={formatDuration(Math.round(avgWork))} sub="per day worked" colorClass="work" />
-        <KpiCard label="Total hours" value={formatDuration(totalMins)} sub={`across ${daysWithWork} days`} colorClass="accent" />
-        <KpiCard label="Overtime days" value={String(overtimeDays)} sub="> 8 hours" colorClass="morning" />
-        <KpiCard label="Avg morning commute" value={formatDuration(Math.round(avgCommuteMor))} sub="leave home → arrive work" />
-        <KpiCard label="Avg evening commute" value={formatDuration(Math.round(avgCommuteEve))} sub="leave work → arrive home" />
-        <KpiCard label="Longest day" value={formatDuration(longestDay)} sub={`shortest: ${formatDuration(shortestDay)}`} colorClass="evening" />
+        <KpiCard
+          label="🌅 Avg morning commute"
+          value={commuteMorMins.length ? formatDuration(Math.round(avgMor)) : '--'}
+          sub="leave home → arrive work"
+          colorClass="morning"
+        />
+        <KpiCard
+          label="🌆 Avg evening commute"
+          value={commuteEveMins.length ? formatDuration(Math.round(avgEve)) : '--'}
+          sub="leave work → arrive home"
+          colorClass="evening"
+        />
+        <KpiCard
+          label="⏱ Avg total commute"
+          value={totalCommuteMins.length ? formatDuration(Math.round(avgTotal)) : '--'}
+          sub="both legs combined"
+          colorClass="accent"
+        />
+        <KpiCard
+          label="🔺 Longest morning"
+          value={commuteMorMins.length ? formatDuration(longestMor) : '--'}
+          sub={commuteMorMins.length ? `shortest: ${formatDuration(shortestMor)}` : undefined}
+          colorClass="morning"
+        />
+        <KpiCard
+          label="🔺 Longest evening"
+          value={commuteEveMins.length ? formatDuration(longestEve) : '--'}
+          sub={commuteEveMins.length ? `shortest: ${formatDuration(shortestEve)}` : undefined}
+          colorClass="evening"
+        />
+        <KpiCard
+          label="📅 Days logged"
+          value={String(daysLogged)}
+          sub="in selected range"
+          colorClass="accent"
+        />
       </div>
 
-      {workByDay.length > 0 && (
+      {commuteByDay.length > 0 && (
         <div className="stats-chart-card">
           <div className="stats-chart-title">
-            💼 Work Hours per Day
-            <span className="stats-chart-subtitle">8h reference line</span>
+            🚗 Commute Duration Over Time
+            <span className="stats-chart-subtitle">minutes</span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={workByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+            <LineChart data={commuteByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} unit="h" domain={[0, 'auto']} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}h`, 'Hours']} />
-              <ReferenceLine y={8} stroke="var(--color-warning)" strokeDasharray="4 4" />
-              <Bar dataKey="hours" fill="var(--color-work)" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} unit="m" />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, '']} />
+              <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--color-text-muted)' }} />
+              <Line type="monotone" dataKey="morning" stroke="var(--color-morning)" strokeWidth={2} dot={false} name="Morning 🌅" connectNulls />
+              <Line type="monotone" dataKey="evening" stroke="var(--color-evening)" strokeWidth={2} dot={false} name="Evening 🌆" connectNulls />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
       <div className="stats-two-col">
-        {commuteByDay.length > 0 && (
+        {morningByDay.length > 0 && (
           <div className="stats-chart-card">
-            <div className="stats-chart-title">🚗 Commute Duration (min)</div>
+            <div className="stats-chart-title stats-chart-title--morning">🌅 Morning Commute</div>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={commuteByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <BarChart data={morningByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
                 <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} unit="m" />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, '']} />
-                <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--color-text-muted)' }} />
-                <Line type="monotone" dataKey="morning" stroke="var(--color-morning)" strokeWidth={2} dot={false} name="Morning" connectNulls />
-                <Line type="monotone" dataKey="evening" stroke="var(--color-evening)" strokeWidth={2} dot={false} name="Evening" connectNulls />
-              </LineChart>
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, 'Duration']} />
+                <Bar dataKey="mins" fill="var(--color-morning)" radius={[3, 3, 0, 0]} name="Morning" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         )}
 
-        {startTimeByDay.length > 0 && (
+        {eveningByDay.length > 0 && (
           <div className="stats-chart-card">
-            <div className="stats-chart-title">⏰ Work Start Time</div>
+            <div className="stats-chart-title stats-chart-title--evening">🌆 Evening Commute</div>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={startTimeByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <BarChart data={eveningByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
+                <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} unit="m" />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}m`, 'Duration']} />
+                <Bar dataKey="mins" fill="var(--color-evening)" radius={[3, 3, 0, 0]} name="Evening" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+
+      <div className="stats-two-col">
+        {departureByDay.length > 0 && (
+          <div className="stats-chart-card">
+            <div className="stats-chart-title stats-chart-title--morning">🏠 Leave Home</div>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={departureByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
                 <YAxis
                   tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }}
                   domain={['auto', 'auto']}
-                  tickFormatter={v => `${Math.floor(v)}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}`}
+                  tickFormatter={formatTimeDecimal}
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
-                  formatter={(v) => {
-                    const num = Number(v);
-                    const h = Math.floor(num);
-                    const m = String(Math.round((num % 1) * 60)).padStart(2, '0');
-                    return [`${h}:${m}`, 'Start time'];
-                  }}
+                  formatter={(v) => [formatTimeDecimal(Number(v)), 'Departure']}
                 />
-                <Line type="monotone" dataKey="startHour" stroke="var(--color-accent)" strokeWidth={2} dot={false} name="Start" connectNulls />
+                <Line type="monotone" dataKey="time" stroke="var(--color-morning)" strokeWidth={2} dot={false} connectNulls />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {arrivalByDay.length > 0 && (
+          <div className="stats-chart-card">
+            <div className="stats-chart-title stats-chart-title--evening">🏡 Arrive Home</div>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={arrivalByDay} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="date" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
+                <YAxis
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }}
+                  domain={['auto', 'auto']}
+                  tickFormatter={formatTimeDecimal}
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(v) => [formatTimeDecimal(Number(v)), 'Arrival']}
+                />
+                <Line type="monotone" dataKey="time" stroke="var(--color-evening)" strokeWidth={2} dot={false} connectNulls />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
       </div>
 
-      {overtimeData.length > 0 && (
-        <div className="stats-chart-card">
-          <div className="stats-chart-title">📈 Top 10 Longest Days</div>
-          <div className="stats-overtime-list">
-            {overtimeData.map(row => (
-              <div key={row.date} className={`overtime-row ${row.over ? 'over' : 'under'}`}>
-                <span>{row.date}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600 }}>{row.hours}h</span>
-                  <span className={`overtime-badge ${row.over ? 'over' : 'under'}`}>
-                    {row.over ? `+${Math.round(row.hours - 8)}h` : 'Under 8h'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {filtered.length === 0 && (
+      {!hasAnyData && (
         <div className="empty-state">
           <span className="empty-state-icon">📊</span>
-          <span>No data for this period</span>
+          <span>No commute data for this period</span>
         </div>
       )}
     </div>

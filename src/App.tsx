@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import NavBar from './components/NavBar';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
@@ -9,6 +10,7 @@ import StatsPage from './pages/StatsPage';
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   if (loading) {
     return (
@@ -24,6 +26,13 @@ function ProtectedApp() {
     <AppProvider>
       <div className="app-shell">
         <NavBar />
+        <button
+          className="theme-toggle-mobile"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         <div className="page-content">
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -40,9 +49,11 @@ function ProtectedApp() {
 export default function App() {
   return (
     <HashRouter>
-      <AuthProvider>
-        <ProtectedApp />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ProtectedApp />
+        </AuthProvider>
+      </ThemeProvider>
     </HashRouter>
   );
 }

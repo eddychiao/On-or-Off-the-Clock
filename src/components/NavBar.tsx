@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './NavBar.css';
 
 const NAV_ITEMS = [
@@ -10,6 +11,7 @@ const NAV_ITEMS = [
 
 export default function NavBar() {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const initials = user?.email
     ? user.email.slice(0, 2).toUpperCase()
@@ -49,9 +51,18 @@ export default function NavBar() {
           <div className="navbar-avatar">{initials}</div>
           <div className="navbar-user-email">{user?.email}</div>
         </div>
-        <button className="btn btn-ghost btn-sm navbar-signout" onClick={signOut}>
-          Sign out
-        </button>
+        <div className="navbar-footer-actions">
+          <button
+            className="btn-icon navbar-theme-btn"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button className="btn btn-ghost btn-sm navbar-signout" onClick={signOut}>
+            Sign out
+          </button>
+        </div>
       </div>
     </nav>
   );
