@@ -91,7 +91,7 @@
 .stats-chart-subtitle {
   font-size: 12px;
   color: var(--color-text-dim);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .stats-chart-title--morning { color: var(--color-morning); }

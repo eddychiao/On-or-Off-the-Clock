@@ -5,8 +5,8 @@
   --color-surface-2: #23232f;
   --color-border: #2e2e3e;
   --color-text: #f0f0f5;
-  --color-text-muted: #8888a0;
-  --color-text-dim: #555570;
+  --color-text-muted: #b0b0cc;
+  --color-text-dim: #8080a8;
 
   --color-accent: #7c5cfc;
   --color-accent-hover: #9479fd;
@@ -46,8 +46,8 @@ html.light {
   --color-surface-2: #eeeef4;
   --color-border: #dcdcec;
   --color-text: #1c1c2e;
-  --color-text-muted: #6b6b88;
-  --color-text-dim: #b0b0c8;
+  --color-text-muted: #3a3a5c;
+  --color-text-dim: #606088;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
