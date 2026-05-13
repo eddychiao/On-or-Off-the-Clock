@@ -40,7 +40,7 @@ export default function TimeCard({ entry, date, variant, icon, title, fields }: 
     <div className={`time-card ${variant}`}>
       <div className="time-card-header">
         <div className="time-card-icon">{icon}</div>
-        <div>
+        <div className="time-card-title-row">
           <div className="time-card-title">{title}</div>
           {duration && duration !== '--' && (
             <span className="duration-badge">{duration}</span>

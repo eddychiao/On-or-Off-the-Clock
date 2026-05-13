@@ -22,12 +22,13 @@ export default function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <div className="navbar-logo-title">
-          <span>On</span><span>/Off</span>
-          <br />
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: 600 }}>the Clock</span>
+        <div className="navbar-logo-emoji">🚗</div>
+        <div>
+          <div className="navbar-logo-title">
+            <span>On</span><span>/Off</span>
+          </div>
+          <div className="navbar-logo-sub">the Clock</div>
         </div>
-        <div className="navbar-logo-sub">Time Tracker</div>
       </div>
 
       <div className="navbar-nav">
