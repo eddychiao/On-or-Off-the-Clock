@@ -66,6 +66,30 @@
 
 .quick-log-btn:active { transform: translateY(0); }
 
+.quick-log-btn.morning {
+  background: var(--color-morning-light);
+  border-color: rgba(249, 115, 22, 0.3);
+  color: var(--color-morning);
+}
+
+.quick-log-btn.morning:hover {
+  background: rgba(249, 115, 22, 0.25);
+  border-color: var(--color-morning);
+  color: var(--color-morning);
+}
+
+.quick-log-btn.evening {
+  background: var(--color-evening-light);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--color-evening);
+}
+
+.quick-log-btn.evening:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: var(--color-evening);
+  color: var(--color-evening);
+}
+
 .quick-log-btn.logged {
   opacity: 0.45;
   cursor: default;

@@ -1,3 +1,10 @@
+.records-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .records-filters {
   display: flex;
   gap: 12px;

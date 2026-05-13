@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 export default function NavBar() {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [signOutConfirm, setSignOutConfirm] = useState(false);
 
   const initials = user?.email
     ? user.email.slice(0, 2).toUpperCase()
@@ -40,10 +42,6 @@ export default function NavBar() {
             {label}
           </NavLink>
         ))}
-        <button className="navbar-mobile-signout" onClick={signOut}>
-          <span className="navbar-mobile-signout-icon">👤</span>
-          Sign out
-        </button>
       </div>
 
       <div className="navbar-footer">
@@ -59,9 +57,17 @@ export default function NavBar() {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <button className="btn btn-ghost btn-sm navbar-signout" onClick={signOut}>
-            Sign out
-          </button>
+          {signOutConfirm ? (
+            <>
+              <span className="navbar-signout-confirm-label">Sign out?</span>
+              <button className="btn btn-danger btn-sm" onClick={signOut}>Yes</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setSignOutConfirm(false)}>No</button>
+            </>
+          ) : (
+            <button className="btn btn-ghost btn-sm navbar-signout" onClick={() => setSignOutConfirm(true)}>
+              Sign out
+            </button>
+          )}
         </div>
       </div>
     </nav>

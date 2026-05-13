@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -8,9 +9,46 @@ import HomePage from './pages/HomePage';
 import RecordsPage from './pages/RecordsPage';
 import StatsPage from './pages/StatsPage';
 
+function UserMenuModal({ onClose }: { onClose: () => void }) {
+  const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    onClose();
+  };
+
+  return (
+    <div className="user-menu-overlay" onClick={onClose}>
+      <div className="user-menu-modal" onClick={e => e.stopPropagation()}>
+        <div className="user-menu-email">{user?.email}</div>
+        <div className="user-menu-divider" />
+        <button className="user-menu-item" onClick={toggleTheme}>
+          {theme === 'dark' ? '☀️  Light mode' : '🌙  Dark mode'}
+        </button>
+        <div className="user-menu-divider" />
+        {confirmSignOut ? (
+          <div className="user-menu-confirm">
+            <span className="user-menu-confirm-label">Sign out?</span>
+            <button className="btn btn-danger btn-sm" onClick={handleSignOut}>Yes, sign out</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setConfirmSignOut(false)}>Cancel</button>
+          </div>
+        ) : (
+          <button className="user-menu-item user-menu-item--danger" onClick={() => setConfirmSignOut(true)}>
+            Sign out
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ProtectedApp() {
   const { user, loading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : '??';
 
   if (loading) {
     return (
@@ -27,12 +65,13 @@ function ProtectedApp() {
       <div className="app-shell">
         <NavBar />
         <button
-          className="theme-toggle-mobile"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="user-menu-btn-mobile"
+          onClick={() => setUserMenuOpen(true)}
+          aria-label="User menu"
         >
-          {theme === 'dark' ? '☀️' : '🌙'}
+          {initials}
         </button>
+        {userMenuOpen && <UserMenuModal onClose={() => setUserMenuOpen(false)} />}
         <div className="page-content">
           <Routes>
             <Route path="/" element={<HomePage />} />

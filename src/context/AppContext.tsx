@@ -13,6 +13,7 @@ interface AppContextValue {
   clearField: (entryId: string, field: TimeField) => Promise<void>;
   updateField: (entryId: string, field: TimeField | 'notes', value: string | null) => Promise<void>;
   saveNotes: (value: string) => Promise<void>;
+  saveRetroEntry: (date: string, fields: Partial<Pick<TimeEntry, TimeField | 'notes'>>) => Promise<void>;
   deleteEntry: (entryId: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -105,6 +106,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, entries, today]);
 
+  const saveRetroEntry = useCallback(async (
+    date: string,
+    fields: Partial<Pick<TimeEntry, TimeField | 'notes'>>
+  ) => {
+    if (!user) return;
+    const clean = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v != null && v !== '')
+    ) as Partial<Pick<TimeEntry, TimeField | 'notes'>>;
+    if (!Object.keys(clean).length) return;
+    const saved = await storage.upsertEntry({ user_id: user.id, date, ...clean });
+    setEntries(prev => {
+      const exists = prev.find(e => e.date === date);
+      if (exists) return prev.map(e => e.date === date ? saved : e);
+      return [...prev, saved].sort((a, b) => b.date.localeCompare(a.date));
+    });
+  }, [user]);
+
   const deleteEntry = useCallback(async (entryId: string) => {
     setEntries(prev => prev.filter(e => e.id !== entryId));
     await storage.deleteEntry(entryId);
@@ -120,6 +138,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearField,
       updateField,
       saveNotes,
+      saveRetroEntry,
       deleteEntry,
       refresh: load,
     }}>

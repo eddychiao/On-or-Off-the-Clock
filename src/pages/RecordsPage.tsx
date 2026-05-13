@@ -2,12 +2,112 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TIME_FIELD_LABELS, TIME_FIELD_GROUPS } from '../types';
 import type { TimeEntry, TimeField } from '../types';
-import { formatTime, durationMinutes, formatDuration, getMonthYear, formatMonthYear, isoToTimeInput, timeInputToISO, todayISO } from '../utils/time';
+import { formatTime, durationMinutes, formatDuration, getMonthYear, formatMonthYear, isoToTimeInput, timeInputToISO, todayISO, yesterdayISO } from '../utils/time';
 import './RecordsPage.css';
 
 const PAGE_SIZE = 30;
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const COMMUTE_FIELDS: { field: TimeField; label: string }[] = [
+  { field: 'commute_start', label: 'Leave home' },
+  { field: 'commute_end', label: 'Arrive work' },
+  { field: 'commute_home_start', label: 'Leave work' },
+  { field: 'commute_home_end', label: 'Arrive home' },
+];
+
+function AddEntryModal({ onClose }: { onClose: () => void }) {
+  const { saveRetroEntry } = useApp();
+  const [date, setDate] = useState(yesterdayISO());
+  const [times, setTimes] = useState<Record<TimeField, string>>({
+    commute_start: '',
+    commute_end: '',
+    work_start: '',
+    work_end: '',
+    commute_home_start: '',
+    commute_home_end: '',
+  });
+  const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const setTime = (field: TimeField, val: string) =>
+    setTimes(prev => ({ ...prev, [field]: val }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    const fields: Partial<Pick<TimeEntry, TimeField | 'notes'>> = {};
+    for (const { field } of COMMUTE_FIELDS) {
+      if (times[field]) fields[field] = timeInputToISO(date, times[field]);
+    }
+    if (notes.trim()) fields.notes = notes.trim();
+    await saveRetroEntry(date, fields);
+    onClose();
+  };
+
+  const maxDate = yesterdayISO();
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Add Entry</h2>
+          <button className="btn-icon" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <label className="modal-label">Date</label>
+          <input
+            type="date"
+            className="input"
+            value={date}
+            max={maxDate}
+            onChange={e => setDate(e.target.value)}
+          />
+
+          <div className="modal-section-title">🌅 Morning Commute</div>
+          {COMMUTE_FIELDS.slice(0, 2).map(({ field, label }) => (
+            <div key={field} className="modal-field-row">
+              <label>{label}</label>
+              <input
+                type="time"
+                className="input"
+                value={times[field]}
+                onChange={e => setTime(field, e.target.value)}
+              />
+            </div>
+          ))}
+
+          <div className="modal-section-title">🌆 Evening Commute</div>
+          {COMMUTE_FIELDS.slice(2).map(({ field, label }) => (
+            <div key={field} className="modal-field-row">
+              <label>{label}</label>
+              <input
+                type="time"
+                className="input"
+                value={times[field]}
+                onChange={e => setTime(field, e.target.value)}
+              />
+            </div>
+          ))}
+
+          <label className="modal-label">Notes</label>
+          <textarea
+            className="input"
+            rows={2}
+            value={notes}
+            placeholder="Optional note…"
+            onChange={e => setNotes(e.target.value)}
+          />
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save entry'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function RecordRow({ entry }: { entry: TimeEntry }) {
   const { updateField, clearField, deleteEntry } = useApp();
@@ -142,6 +242,7 @@ export default function RecordsPage() {
   const [filterYear, setFilterYear] = useState<string>('');
   const [filterMonth, setFilterMonth] = useState<string>('');
   const [page, setPage] = useState(1);
+  const [addEntryOpen, setAddEntryOpen] = useState(false);
 
   const pastEntries = useMemo(() =>
     entries.filter(e => e.date !== today),
@@ -192,9 +293,15 @@ export default function RecordsPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <h1 className="page-title">Records</h1>
-        <p className="page-subtitle">{filtered.length} entr{filtered.length === 1 ? 'y' : 'ies'}</p>
+      {addEntryOpen && <AddEntryModal onClose={() => setAddEntryOpen(false)} />}
+      <div className="page-header records-page-header">
+        <div>
+          <h1 className="page-title">Records</h1>
+          <p className="page-subtitle">{filtered.length} entr{filtered.length === 1 ? 'y' : 'ies'}</p>
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={() => setAddEntryOpen(true)}>
+          + Add entry
+        </button>
       </div>
 
       <div className="records-filters">

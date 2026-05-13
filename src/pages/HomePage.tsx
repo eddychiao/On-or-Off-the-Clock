@@ -20,6 +20,15 @@ const QUICK_FIELD_ICONS: Record<TimeField, string> = {
   commute_home_end: '🏡',
 };
 
+const QUICK_FIELD_COLOR: Record<TimeField, 'morning' | 'evening'> = {
+  commute_start: 'morning',
+  commute_end: 'morning',
+  work_start: 'morning',
+  work_end: 'morning',
+  commute_home_start: 'evening',
+  commute_home_end: 'evening',
+};
+
 function NotesArea() {
   const { todayEntry, saveNotes } = useApp();
   const [draft, setDraft] = useState<string | null>(null);
@@ -91,7 +100,7 @@ export default function HomePage() {
                 return (
                   <button
                     key={field}
-                    className={`quick-log-btn${logged ? ' logged' : ''}`}
+                    className={`quick-log-btn ${QUICK_FIELD_COLOR[field]}${logged ? ' logged' : ''}`}
                     onClick={() => !logged && logField(field)}
                     title={logged ? 'Already logged' : `Log ${TIME_FIELD_LABELS[field]}`}
                   >
