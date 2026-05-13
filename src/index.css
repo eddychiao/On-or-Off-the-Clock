@@ -486,7 +486,7 @@ select.input { cursor: pointer; }
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .page-content {
-    padding: 20px 16px calc(100px + env(safe-area-inset-bottom));
+    padding: calc(env(safe-area-inset-top, 0px) + 60px) 16px calc(100px + env(safe-area-inset-bottom));
   }
 
   .page-title { font-size: 22px; }

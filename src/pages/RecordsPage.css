@@ -5,6 +5,12 @@
   gap: 12px;
 }
 
+@media (max-width: 768px) {
+  .records-page-header {
+    flex-direction: column;
+  }
+}
+
 .records-filters {
   display: flex;
   gap: 12px;

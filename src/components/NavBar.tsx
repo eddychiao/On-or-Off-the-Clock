@@ -5,9 +5,9 @@ import { useTheme } from '../context/ThemeContext';
 import './NavBar.css';
 
 const NAV_ITEMS = [
-  { to: '/', icon: '⏱', label: 'Today' },
-  { to: '/records', icon: '📋', label: 'Records' },
-  { to: '/stats', icon: '📊', label: 'Stats' },
+  { to: '/', label: 'Today' },
+  { to: '/records', label: 'Records' },
+  { to: '/stats', label: 'Stats' },
 ];
 
 export default function NavBar() {
@@ -31,14 +31,13 @@ export default function NavBar() {
       </div>
 
       <div className="navbar-nav">
-        {NAV_ITEMS.map(({ to, icon, label }) => (
+        {NAV_ITEMS.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
           >
-            <span className="nav-link-icon">{icon}</span>
             {label}
           </NavLink>
         ))}

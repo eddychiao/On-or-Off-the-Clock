@@ -137,10 +137,10 @@
 }
 
 .duration-badge {
-  font-size: 11px;
-  padding: 3px 8px;
+  font-size: 13px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .morning .duration-badge { background: var(--color-morning-light); color: var(--color-morning); }
